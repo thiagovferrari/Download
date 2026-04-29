@@ -15,9 +15,9 @@ const PORT = 3000;
 
 // ─── Binary paths ─────────────────────────────────────────────────────────────
 // yt-dlp installed via pip (not on system PATH — use full path)
-const YTDLP_BIN  = 'C:\\Users\\profi\\AppData\\Roaming\\Python\\Python314\\Scripts\\yt-dlp.exe';
+const YTDLP_BIN  = process.env.YTDLP_BIN || 'C:\\Users\\profi\\AppData\\Roaming\\Python\\Python314\\Scripts\\yt-dlp.exe';
 // ffmpeg bundled in project /bin
-const FFMPEG_BIN = path.join(__dirname, 'bin', 'ffmpeg.exe');
+const FFMPEG_BIN = process.env.FFMPEG_BIN || path.join(__dirname, 'bin', 'ffmpeg.exe');
 
 // ─── Middleware ───────────────────────────────────────────────────────────────
 app.use(express.json());
@@ -120,7 +120,9 @@ app.get('/api/download', (req, res) => {
   ]);
 
   let infoOut = '';
+  let infoErr = '';
   infoProc.stdout.on('data', d => { infoOut += d.toString(); });
+  infoProc.stderr.on('data', d => { infoErr += d.toString(); }); // PREVENT DEADLOCK
 
   infoProc.on('close', infoCode => {
     let title = 'video';
@@ -130,6 +132,8 @@ app.get('/api/download', (req, res) => {
         const info = JSON.parse(infoOut.trim().split('\n').pop());
         title = info.title || 'video';
       } catch { /* use fallback */ }
+    } else {
+        console.error('infoProc failed:', infoErr);
     }
 
     const safeTitle  = sanitizeFilename(title);
