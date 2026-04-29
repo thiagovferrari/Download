@@ -14,14 +14,26 @@ const app  = express();
 const PORT = 3000;
 
 // ─── Binary paths ─────────────────────────────────────────────────────────────
-// yt-dlp installed via pip (not on system PATH — use full path)
-const YTDLP_BIN  = process.env.YTDLP_BIN || 'C:\\Users\\profi\\AppData\\Roaming\\Python\\Python314\\Scripts\\yt-dlp.exe';
-// ffmpeg bundled in project /bin
-const FFMPEG_BIN = process.env.FFMPEG_BIN || path.join(__dirname, 'bin', 'ffmpeg.exe');
+let YTDLP_BIN = 'yt-dlp';
+let FFMPEG_BIN = 'ffmpeg';
+
+try {
+  const ffmpeg = require('@ffmpeg-installer/ffmpeg');
+  FFMPEG_BIN = ffmpeg.path;
+  const os = require('os');
+  const path = require('path');
+  const ext = os.platform() === 'win32' ? '.exe' : '';
+  YTDLP_BIN = path.resolve(__dirname, 'node_modules', 'yt-dlp-exec', 'bin', `yt-dlp${ext}`);
+} catch (e) {
+  console.warn('npm binaries not found, using global or env paths.');
+  YTDLP_BIN = process.env.YTDLP_BIN || 'yt-dlp';
+  FFMPEG_BIN = process.env.FFMPEG_BIN || 'ffmpeg';
+}
 
 // ─── Middleware ───────────────────────────────────────────────────────────────
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
 
 // In-memory store for completed downloads (cleared after serve)
 const pendingFiles = new Map();
@@ -271,9 +283,13 @@ setInterval(() => {
 }, 5 * 60 * 1000);
 
 // ─── Start ─────────────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log('\n  ╭─────────────────────────────────╮');
-  console.log(`  │   Lon Download                  │`);
-  console.log(`  │   http://localhost:${PORT}          │`);
-  console.log('  ╰─────────────────────────────────╯\n');
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log('\n  ╭─────────────────────────────────╮');
+    console.log(`  │   Lon Download                  │`);
+    console.log(`  │   http://localhost:${PORT}          │`);
+    console.log('  ╰─────────────────────────────────╯\n');
+  });
+}
+
+module.exports = app;
