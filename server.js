@@ -20,12 +20,21 @@ let FFMPEG_BIN = 'ffmpeg';
 try {
   const ffmpeg = require('@ffmpeg-installer/ffmpeg');
   FFMPEG_BIN = ffmpeg.path;
+  
+  const ytPkgPath = require.resolve('yt-dlp-exec/package.json');
+  const ytBaseDir = path.dirname(ytPkgPath);
   const os = require('os');
-  const path = require('path');
   const ext = os.platform() === 'win32' ? '.exe' : '';
-  YTDLP_BIN = path.resolve(__dirname, 'node_modules', 'yt-dlp-exec', 'bin', `yt-dlp${ext}`);
+  const resolvedPath = path.join(ytBaseDir, 'bin', `yt-dlp${ext}`);
+  
+  if (fs.existsSync(resolvedPath)) {
+    YTDLP_BIN = resolvedPath;
+    if (os.platform() !== 'win32') {
+      try { fs.chmodSync(YTDLP_BIN, 0o755); } catch (e) { console.error('Chmod failed:', e); }
+    }
+  }
 } catch (e) {
-  console.warn('npm binaries not found, using global or env paths.');
+  console.warn('Binary resolution failed, using fallbacks:', e.message);
   YTDLP_BIN = process.env.YTDLP_BIN || 'yt-dlp';
   FFMPEG_BIN = process.env.FFMPEG_BIN || 'ffmpeg';
 }
