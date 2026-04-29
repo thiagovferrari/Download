@@ -1,29 +1,7 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "server.js",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": [
-          "node_modules/yt-dlp-exec/**",
-          "node_modules/@ffmpeg-installer/**"
-        ]
-      }
-    },
-    {
-      "src": "public/**",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "server.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/public/$1"
-    }
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index.js" },
+    { "source": "/(.*)", "destination": "/public/$1" }
   ]
 }
