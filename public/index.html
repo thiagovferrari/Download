@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lon Download</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Background orbs -->
+  <div class="bg-orb bg-orb--1"></div>
+  <div class="bg-orb bg-orb--2"></div>
+
+  <main class="app">
+
+    <!-- Logo pill -->
+    <div class="logo-wrap">
+      <div class="logo-pill">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+      </div>
+      <span class="logo-label">Lon Download</span>
+    </div>
+
+    <!-- Card -->
+    <div class="card" id="card">
+
+      <!-- Header -->
+      <div class="card-header">
+        <h1 class="card-title">Download de Vídeo</h1>
+        <p class="card-subtitle">Cole o link do YouTube para baixar em alta qualidade</p>
+      </div>
+
+      <!-- Form -->
+      <form class="form" id="form" autocomplete="off">
+
+        <!-- URL preview strip (shown after paste) -->
+        <div class="url-preview" id="urlPreview" hidden>
+          <div class="url-preview__thumb" id="previewThumb">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+          </div>
+          <div class="url-preview__meta">
+            <span class="url-preview__title" id="previewTitle">Carregando…</span>
+            <span class="url-preview__sub" id="previewSub"></span>
+          </div>
+          <div class="url-preview__badge" id="previewBadge">HD</div>
+        </div>
+
+        <!-- Input -->
+        <div class="input-wrap" id="inputWrap">
+          <div class="input-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+            </svg>
+          </div>
+          <input
+            type="url"
+            id="urlInput"
+            class="input"
+            placeholder="https://youtube.com/watch?v=..."
+            spellcheck="false"
+            autocorrect="off"
+            autocapitalize="none"
+          />
+          <button type="button" class="input-clear" id="clearBtn" hidden aria-label="Limpar">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Button -->
+        <button type="submit" class="btn-download" id="downloadBtn">
+          <span class="btn-download__icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+          </span>
+          <span class="btn-download__label">Download</span>
+        </button>
+
+      </form>
+
+      <!-- Progress section -->
+      <div class="progress-section" id="progressSection" hidden>
+
+        <!-- State: loading info -->
+        <div class="state state--info" id="stateInfo">
+          <div class="spinner"></div>
+          <span class="state__label">Obtendo informações…</span>
+        </div>
+
+        <!-- State: downloading -->
+        <div class="state state--downloading" id="stateDownloading" hidden>
+          <div class="progress-header">
+            <span class="progress-filename" id="progressFilename"></span>
+            <span class="progress-pct" id="progressPct">0%</span>
+          </div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar" id="progressBar"></div>
+          </div>
+          <div class="progress-meta">
+            <span class="progress-meta__item" id="progressSpeed"></span>
+            <span class="progress-meta__item" id="progressEta"></span>
+            <span class="progress-meta__item" id="progressSize"></span>
+          </div>
+        </div>
+
+        <!-- State: success -->
+        <div class="state state--success" id="stateSuccess" hidden>
+          <div class="state__icon state__icon--success">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <div class="state__body">
+            <span class="state__label state__label--bold">Download concluído</span>
+            <span class="state__sub" id="successFilename"></span>
+          </div>
+        </div>
+
+        <!-- State: error -->
+        <div class="state state--error" id="stateError" hidden>
+          <div class="state__icon state__icon--error">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+          </div>
+          <span class="state__label" id="errorMessage"></span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span>Requer <a href="#" class="footer-link" onclick="return false">yt-dlp</a> e <a href="#" class="footer-link" onclick="return false">ffmpeg</a> instalados</span>
+    </footer>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
