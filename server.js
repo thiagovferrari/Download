@@ -164,7 +164,35 @@ app.get('/api/download', (req, res) => {
 
     sendSSE(res, { type: 'info', title: safeTitle });
 
-    // ── Step 2: Download ──
+    // ─── High Performance Engine (Cobalt) ───
+    // This bypasses Vercel 10s timeout and binary issues
+    try {
+      const cobaltRes = await fetch('https://api.cobalt.tools/api/json', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url, vQuality: '1080' })
+      });
+      const cobaltData = await cobaltRes.json();
+      
+      if (cobaltData && cobaltData.url) {
+        sendSSE(res, { type: 'info', title: 'Vídeo Processado' });
+        sendSSE(res, { type: 'progress', percent: 50 });
+        setTimeout(() => {
+          sendSSE(res, { type: 'progress', percent: 100 });
+          sendSSE(res, { 
+            type: 'complete', 
+            externalUrl: cobaltData.url, 
+            filename: `download_${sessionId}.mp4` 
+          });
+          res.end();
+        }, 1500);
+        return;
+      }
+    } catch (e) {
+      console.warn('Cobalt Engine failed, trying local (if available)...');
+    }
+
+    // ── Step 2: Local Download (Fallback) ──
     const dlProc = spawn(YTDLP_BIN, [
       '--cache-dir', path.join(tmpDir, 'yt-dlp-cache'),
       '-f', 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio/best[ext=mp4]/best',

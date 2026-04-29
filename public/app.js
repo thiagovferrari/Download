@@ -223,8 +223,9 @@
           setTimeout(() => {
             // Trigger browser download
             const a = document.createElement('a');
-            a.href = `/api/file/${msg.sessionId}`;
+            a.href = msg.externalUrl || `/api/file/${msg.sessionId}`;
             a.download = msg.filename || 'video.mp4';
+            if (msg.externalUrl) a.target = '_blank';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
