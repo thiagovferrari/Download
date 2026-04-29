@@ -71,6 +71,7 @@ app.get('/api/info', (req, res) => {
   }
 
   const proc = spawn(YTDLP_BIN, [
+    '--cache-dir', path.join(os.tmpdir(), 'yt-dlp-cache'),
     '--dump-json',
     '--no-playlist',
     '--no-warnings',
@@ -126,6 +127,7 @@ app.get('/api/download', (req, res) => {
 
   // ── Step 1: Get title ──
   const infoProc = spawn(YTDLP_BIN, [
+    '--cache-dir', path.join(tmpDir, 'yt-dlp-cache'),
     '--dump-json', '--no-playlist', '--no-warnings',
     '--ffmpeg-location', FFMPEG_BIN,
     url,
@@ -155,6 +157,7 @@ app.get('/api/download', (req, res) => {
 
     // ── Step 2: Download ──
     const dlProc = spawn(YTDLP_BIN, [
+      '--cache-dir', path.join(tmpDir, 'yt-dlp-cache'),
       '-f', 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio/best[ext=mp4]/best',
       '--merge-output-format', 'mp4',
       '--newline',
@@ -164,6 +167,12 @@ app.get('/api/download', (req, res) => {
       '-o', outputPath,
       url,
     ]);
+
+    dlProc.on('error', err => {
+      console.error('dlProc failed to start:', err);
+      sendSSE(res, { type: 'error', message: 'Falha ao iniciar yt-dlp. Verifique a instalação.' });
+      res.end();
+    });
 
     dlProc.stdout.on('data', data => {
       const line = data.toString();
